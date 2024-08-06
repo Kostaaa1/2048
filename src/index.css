@@ -17,3 +17,15 @@ body {
   align-items: center;
   background-color: #e2e0d5;
 }
+
+.cell {
+  position: absolute;
+  width: 100px; /* Adjust based on your grid size */
+  height: 100px; /* Adjust based on your grid size */
+  transition: transform 0.3s ease; /* Smooth transition */
+  border: 1px solid red;
+}
+
+.cell.moving {
+  transition: transform 0.3s ease; /* Smooth transition while moving */
+}
