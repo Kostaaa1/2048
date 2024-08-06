@@ -1,26 +1,25 @@
 import { useEffect } from "react";
 import useBoard from "./hook/useBoard";
-import { colors } from "./utils/utils";
+import { colors, getRandEmptyCellIndices, newCell } from "./utils/utils";
 
 function App() {
   const {
     areBoardsSame,
-    getRandEmptyCellIndices,
-    newCell,
     board,
     moveDown,
     moveLeft,
     moveRight,
     moveUp,
     score,
-    rewindMove,
+    prevBoard,
     setBoard,
   } = useBoard();
 
   useEffect(() => {
     const eventHandler = (e: KeyboardEvent) => {
-      const arrows = ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"];
+      const arrows = ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "Backspace"];
       const { key } = e;
+
       if (!arrows.includes(key)) return;
       let copyBoard = board.map((row) => row.slice());
 
@@ -41,9 +40,14 @@ function App() {
           copyBoard = moveDown(copyBoard);
           break;
         }
+        case arrows[4]: {
+          if (prevBoard) setBoard(prevBoard);
+          return;
+        }
       }
 
       if (!areBoardsSame(copyBoard, board)) {
+        // move this to hook
         const { row, col } = getRandEmptyCellIndices(copyBoard);
         copyBoard[row][col] = newCell(2);
         const el = document.getElementById(`cell-${row}-${col}`) as HTMLDivElement;
@@ -54,6 +58,7 @@ function App() {
           }, 200);
         }
       }
+
       setBoard(copyBoard);
     };
 
@@ -61,13 +66,13 @@ function App() {
     return () => {
       document.removeEventListener("keydown", eventHandler);
     };
-  }, [board]);
+  }, [prevBoard, board]);
 
   return (
     <>
       <div className="w-full flex justify-between items-center">
         <button
-          onClick={rewindMove}
+          onClick={() => setBoard(prevBoard ?? board)}
           className="text-white rounded-lg h-8 px-2 duration-200 bg-[#BBADA0]"
         >
           Previous move

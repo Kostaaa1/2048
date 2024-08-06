@@ -1,65 +1,19 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import usePrevious from "./usePrevious";
-import { colors, GLOBAL } from "../utils/utils";
-
-type Cell = {
-  value: number;
-  bgColor: string;
-  textColor: string;
-};
+import { Cell, createBoard, GLOBAL, newCell } from "../utils/utils";
 
 export default function useBoard() {
   const [board, setBoard] = useState<Cell[][]>(createBoard);
   const prevBoard = usePrevious<Cell[][]>(board);
   const [score, setScore] = useState<number>(0);
 
-  function getRandEmptyCellIndices(board: Cell[][]): { row: number; col: number } {
-    const emptyCells: { row: number; col: number }[] = [];
-    for (let i = 0; i < GLOBAL.rows; i++) {
-      for (let j = 0; j < GLOBAL.cols; j++) {
-        if (board[i][j].value === 0) {
-          emptyCells.push({ row: i, col: j });
-        }
-      }
-    }
-    const rand = Math.floor(Math.random() * emptyCells.length);
-    return emptyCells[rand];
-  }
-
-  function newCell(value: number): Cell {
-    const parseColor = () => {
-      if (value >= 128) {
-        return colors.cell[128];
-      } else if (value >= 32) {
-        return colors.cell[32];
-      } else {
-        return colors.cell[value];
-      }
-    };
-    const cell = {
-      value,
-      bgColor: parseColor(),
-      textColor: value >= 8 ? colors.bg : colors.value,
-    };
-    return cell;
-  }
-
-  function areBoardsSame(b1: Cell[][], b2: Cell[][]): boolean {
+  const areBoardsSame = (b1: Cell[][], b2: Cell[][]) => {
     return b1.every((row, rowId) =>
-      row.every((col, colId) => col.value === b2[rowId][colId].value)
+      row.every((col, colId) => {
+        return col.value === b2[rowId][colId].value;
+      })
     );
-  }
-
-  function createBoard() {
-    const emptyBoard: Cell[][] = Array.from({ length: GLOBAL.rows }, () =>
-      Array.from({ length: GLOBAL.cols }, () => newCell(0))
-    );
-    const rand = getRandEmptyCellIndices(emptyBoard);
-    emptyBoard[rand.row][rand.col] = newCell(2);
-    const rand2 = getRandEmptyCellIndices(emptyBoard);
-    emptyBoard[rand2.row][rand2.col] = newCell(2);
-    return emptyBoard;
-  }
+  };
 
   const moveLeft = (row: Cell[]): Cell[] => {
     for (let i = 0; i < row.length - 1; i++) {
@@ -71,8 +25,9 @@ export default function useBoard() {
     for (let i = 0; i < row.length; i++) {
       if (i > 0 && row[i].value === row[i - 1].value) {
         const n = newCell(row[i].value * 2);
-        setScore((score) => n.value + score);
+        setScore((score) => score + n.value);
         [row[i], row[i - 1]] = [newCell(0), n];
+        isValue2048(n.value);
       }
     }
     for (let i = 0; i < row.length - 1; i++) {
@@ -100,6 +55,7 @@ export default function useBoard() {
         const n = newCell(row[i].value * 2);
         setScore((score) => score + n.value);
         [row[i], row[i - 1]] = [n, newCell(0)];
+        isValue2048(n.value);
       }
     }
     return row;
@@ -123,6 +79,7 @@ export default function useBoard() {
             const n = newCell(b[i][k].value * 2);
             setScore((score) => score + n.value);
             [b[i][k], b[i + 1][k]] = [n, newCell(0)];
+            isValue2048(n.value);
           }
         }
       }
@@ -154,6 +111,7 @@ export default function useBoard() {
             const n = newCell(b[i][k].value * 2);
             setScore((score) => score + n.value);
             [b[i][k], b[i - 1][k]] = [n, newCell(0)];
+            isValue2048(n.value);
           }
         }
       }
@@ -164,15 +122,18 @@ export default function useBoard() {
     return b;
   };
 
-  const rewindMove = useCallback(() => {
-    if (prevBoard) setBoard(prevBoard);
-  }, [prevBoard]);
+  const isValue2048 = (value: number) => {
+    setTimeout(() => {
+      if (value === GLOBAL.finalScore) alert("You won the game !!!");
+    }, 0);
+  };
 
   return {
-    createBoard,
-    getRandEmptyCellIndices,
+    prevBoard,
+    // createBoard,
+    // getRandEmptyCellIndices,
+    // newCell,
     areBoardsSame,
-    newCell,
     moveDown,
     moveRight,
     moveLeft,
@@ -180,6 +141,5 @@ export default function useBoard() {
     board,
     score,
     setBoard,
-    rewindMove,
   };
 }
