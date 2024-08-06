@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import useBoard from "./hook/useBoard";
-import { colors, getRandEmptyCellIndices, newCell } from "./utils/utils";
+import { colors } from "./utils/utils";
 
 function App() {
   const {
@@ -13,6 +13,7 @@ function App() {
     score,
     prevBoard,
     setBoard,
+    generateNewCell,
   } = useBoard();
 
   useEffect(() => {
@@ -47,26 +48,16 @@ function App() {
       }
 
       if (!areBoardsSame(copyBoard, board)) {
-        // move this to hook
-        const { row, col } = getRandEmptyCellIndices(copyBoard);
-        copyBoard[row][col] = newCell(2);
-        const el = document.getElementById(`cell-${row}-${col}`) as HTMLDivElement;
-        if (el) {
-          el.classList.add("animate-appear");
-          setTimeout(() => {
-            el.classList.remove("animate-appear");
-          }, 200);
-        }
+        generateNewCell(copyBoard);
+        setBoard(copyBoard);
       }
-
-      setBoard(copyBoard);
     };
 
     document.addEventListener("keydown", eventHandler);
     return () => {
       document.removeEventListener("keydown", eventHandler);
     };
-  }, [prevBoard, board]);
+  }, [board]);
 
   return (
     <>

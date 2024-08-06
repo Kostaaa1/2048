@@ -61,11 +61,10 @@ function createBoard() {
     Array.from({ length: GLOBAL.cols }, () => newCell(0))
   );
 
-  // const rand = getRandEmptyCellIndices(emptyBoard);
-  // emptyBoard[rand.row][rand.col] = newCell(2);
-  // const rand2 = getRandEmptyCellIndices(emptyBoard);
-  // emptyBoard[rand2.row][rand2.col] = newCell(2);
-  emptyBoard[0][0] = newCell(2);
+  const rand = getRandEmptyCellIndices(emptyBoard);
+  emptyBoard[rand.row][rand.col] = newCell(2);
+  const rand2 = getRandEmptyCellIndices(emptyBoard);
+  emptyBoard[rand2.row][rand2.col] = newCell(2);
 
   return emptyBoard;
 }

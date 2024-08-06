@@ -1,6 +1,6 @@
 import { useState } from "react";
 import usePrevious from "./usePrevious";
-import { Cell, createBoard, GLOBAL, newCell } from "../utils/utils";
+import { Cell, createBoard, getRandEmptyCellIndices, GLOBAL, newCell } from "../utils/utils";
 
 export default function useBoard() {
   const [board, setBoard] = useState<Cell[][]>(createBoard);
@@ -8,11 +8,23 @@ export default function useBoard() {
   const [score, setScore] = useState<number>(0);
 
   const areBoardsSame = (b1: Cell[][], b2: Cell[][]) => {
-    return b1.every((row, rowId) =>
+    const areSame = b1.every((row, rowId) =>
       row.every((col, colId) => {
         return col.value === b2[rowId][colId].value;
       })
     );
+    if (areSame) {
+      const areFilled = b1.every((row) =>
+        row.every((col) => {
+          return col.value !== 0;
+        })
+      );
+      if (areFilled) {
+        console.log(prevBoard);
+        alert("You lost the game..");
+      }
+    }
+    return areSame;
   };
 
   const moveLeft = (row: Cell[]): Cell[] => {
@@ -128,11 +140,21 @@ export default function useBoard() {
     }, 0);
   };
 
+  const generateNewCell = (b: Cell[][]) => {
+    const { row, col } = getRandEmptyCellIndices(b);
+    b[row][col] = newCell(2);
+    const el = document.getElementById(`cell-${row}-${col}`) as HTMLDivElement;
+    if (el) {
+      el.classList.add("animate-appear");
+      setTimeout(() => {
+        el.classList.remove("animate-appear");
+      }, 200);
+    }
+  };
+
   return {
+    generateNewCell,
     prevBoard,
-    // createBoard,
-    // getRandEmptyCellIndices,
-    // newCell,
     areBoardsSame,
     moveDown,
     moveRight,
